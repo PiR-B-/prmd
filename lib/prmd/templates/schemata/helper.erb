@@ -34,7 +34,7 @@
           description = descriptions.last
         end
 
-        example = [*examples].map { |e| "`#{e.to_json}`" }.join(" or ")
+        example = [*examples].map { |e| "`#{e}`" }.join(" or ")
         attributes << [key, "string", description, example]
 
       # found a nested object
@@ -72,7 +72,8 @@
     end
     attributes.map! { |key, type, description, example|
       if example.nil? && Prmd::DefaultExamples.key?(type)
-        example = "`%s`" % Prmd::DefaultExamples[type].to_json
+        example = ""
+        # example = "`%s`" % Prmd::DefaultExamples[type].to_json
       end
       [key, type, description, example]
     }
@@ -115,25 +116,25 @@
   def build_attribute(schema, key, value)
     description = value['description'] || ""
     if value['default']
-      description += "<br/> **default:** `#{value['default'].to_json}`"
+      description += "<br/> **default:** `#{value['default']}`"
     end
 
     if value['minimum'] || value['maximum']
-      description += "<br/> **Range:** `"
+      description += "<br/> **range:** `"
       if value['minimum']
         comparator = value['exclusiveMinimum'] ? "<" : "<="
-        description += "#{value['minimum'].to_json} #{comparator} "
+        description += "#{value['minimum']} #{comparator} "
       end
       description += "value"
       if value['maximum']
         comparator = value['exclusiveMaximum'] ? "<" : "<="
-        description += " #{comparator} #{value['maximum'].to_json}"
+        description += " #{comparator} #{value['maximum']}"
       end
       description += "`"
     end
 
     if value['enum']
-      description += '<br/> **one of:**' + [*value['enum']].map { |e| "`#{e.to_json}`" }.join(" or ")
+      description += '<br/>' + [*value['enum']].map { |e| "`#{e}`" }.join(" or ")
     end
 
     if value['pattern']
@@ -143,14 +144,14 @@
     if value['minLength'] || value['maxLength']
       description += "<br/> **Length:** `"
       if value['minLength']
-        description += "#{value['minLength'].to_json}"
+        description += "#{value['minLength']}"
       end
       unless value['minLength'] == value['maxLength']
         if value['maxLength']
           unless value['minLength']
             description += "0"
           end
-          description += "..#{value['maxLength'].to_json}"
+          description += "..#{value['maxLength']}"
         else
           description += "..∞"
         end
@@ -160,12 +161,12 @@
 
     if value.has_key?('example')
       example = if value['example'].is_a?(Hash) && value['example'].has_key?('oneOf')
-        value['example']['oneOf'].map { |e| "`#{e.to_json}`" }.join(" or ")
+        value['example']['oneOf'].map { |e| "`#{e}`" }.join(" or ")
       else
-        "`#{value['example'].to_json}`"
+        "`#{value['example']}`"
       end
     elsif (value['type'] == ['array'] && value.has_key?('items')) || value.has_key?('enum')
-      example = "`#{schema.schema_value_example(value).to_json}`"
+      example = "`#{schema.schema_value_example(value)}`"
     elsif value['type'].include?('null')
       example = "`null`"
     end
