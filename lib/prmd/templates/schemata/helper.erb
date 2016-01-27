@@ -16,11 +16,13 @@
       if value.has_key?('anyOf')
         descriptions = []
         examples = []
+        types = []
 
         anyof = value['anyOf']
 
         anyof.each do |ref|
           _, nested_field = schema.dereference(ref)
+          types.concat(nested_field['type']) if nested_field['type']
           descriptions << nested_field['description'] if nested_field['description']
           examples << nested_field['example'] if nested_field['example']
         end
@@ -34,8 +36,16 @@
           description = descriptions.last
         end
 
+        type = if types.size > 1
+          types.first.gsub!(/ of (this )?.*/, "")
+          # types[1..-1].map { |d| d.gsub!(/unique /, "") }
+          [types[0...-1].join(", "), types.last].join(" or ")
+        else
+          type = types.last
+        end
+
         example = [*examples].map { |e| "`#{e}`" }.join(" or ")
-        attributes << [key, "string", description, example]
+        attributes << [key, type, description, example]
 
       # found a nested object
       elsif value['properties']
