@@ -74,7 +74,7 @@ Content-Type: <%= link['mediaType'] %>
 
   <%- end %>
   <%- unless optional.empty? %>
-*Optionnal parameters*
+*Optional parameters*
 
 <%= link_schema_properties_template.result(params: optional, schema: schema, options: options) %>
   <%- end %>
