@@ -42,7 +42,11 @@ module Prmd
           datum['type'] = [*datum['type']]
         end
         datum.each_with_object({}) do |(k, v), hash|
-          hash[k] = convert_type_to_array(v, options)
+          if k != 'example'
+            hash[k] = convert_type_to_array(v, options)
+          else
+            hash[k] = v
+          end
         end
       else
         datum
@@ -114,6 +118,8 @@ module Prmd
         end
         ref = id_ref || value['anyOf'].first
         schema_example(ref)
+      elsif value.key?('allOf')
+        value['allOf'].map { |ref| schema_example(ref) }.reduce({}, &:merge)
       elsif value.key?('properties') # nested properties
         schema_example(value)
       elsif value.key?('items') # array of objects
